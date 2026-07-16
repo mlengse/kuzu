@@ -76,7 +76,8 @@ class CMakeBuild(build_ext):
         build_dir = os.path.join(ext.sourcedir, 'kuzu-source')
 
         # Clean the build directory (ignore failure on fresh sdist).
-        subprocess.run(['make', 'clean'], cwd=build_dir)
+        if sys.platform != 'win32':
+            subprocess.run(['make', 'clean'], cwd=build_dir)
 
         try:
             num_cores = int(os.environ['NUM_THREADS'])
@@ -86,8 +87,12 @@ class CMakeBuild(build_ext):
             num_cores = multiprocessing.cpu_count()
 
         # Build the native extension.
-        full_cmd = ['make', 'python', 'NUM_THREADS=%d' % num_cores]
-        subprocess.run(full_cmd, cwd=build_dir, check=True, env=env_vars)
+        if sys.platform == 'win32':
+            subprocess.run(['cmake', '-G', 'Ninja', '-B', 'build/release', '-DCMAKE_BUILD_TYPE=Release', '-DBUILD_PYTHON=TRUE', '-DBUILD_SHELL=FALSE', '-DKUZU_ENABLE_HTTPS_EXTENSION_DOWNLOADS=OFF'], cwd=build_dir, check=True, env=env_vars)
+            subprocess.run(['cmake', '--build', 'build/release', '--config', 'Release'], cwd=build_dir, check=True, env=env_vars)
+        else:
+            full_cmd = ['make', 'python', 'NUM_THREADS=%d' % num_cores]
+            subprocess.run(full_cmd, cwd=build_dir, check=True, env=env_vars)
         self.announce("Done building native extension.")
         self.announce("Copying native extension...")
         dst = os.path.join(ext.sourcedir, ext.name)
