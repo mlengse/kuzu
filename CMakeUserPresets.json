@@ -1,0 +1,15 @@
+{
+    "version": 6,
+    "configurePresets": [
+        {
+            "name": "debug",
+            "displayName": "Debug",
+            "binaryDir": "${sourceDir}/cmake-build-debug",
+            "generator": "Ninja",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "OPENSSL_ROOT_DIR": "C:/Program Files/OpenSSL-Win64"
+            }
+        }
+    ]
+}
